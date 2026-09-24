@@ -1,0 +1,26 @@
+{
+  "name": "api-funcionarios-obras",
+  "version": "1.0.0",
+  "description": "API REST em TypeScript, Node.js, Express e Prisma para gerenciamento de funcionários e obras.",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "express": "^5.1.0",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.0",
+    "prisma": "^6.19.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.9.2"
+  }
+}

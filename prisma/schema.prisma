@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Funcionario {
+  id           Int          @id @default(autoincrement())
+  nome         String
+  email        String       @unique
+  cargo        String?
+  salario      Float?
+  criadoEm     DateTime     @default(now())
+  atualizadoEm DateTime     @updatedAt
+
+  alocacoes    Alocacao[]
+
+  @@map("funcionarios")
+}
+
+model Obra {
+  id           Int          @id @default(autoincrement())
+  nome         String
+  endereco     String?
+  status       String        @default("PLANEJADA")
+  dataInicio   DateTime?
+  dataFim      DateTime?
+  criadoEm     DateTime      @default(now())
+  atualizadoEm DateTime      @updatedAt
+
+  alocacoes    Alocacao[]
+
+  @@map("obras")
+}
+
+model Alocacao {
+  id            Int         @id @default(autoincrement())
+  funcionarioId Int
+  obraId        Int
+  criadoEm      DateTime    @default(now())
+
+  funcionario   Funcionario @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
+  obra          Obra        @relation(fields: [obraId], references: [id], onDelete: Cascade)
+
+  @@unique([funcionarioId, obraId])
+  @@map("alocacoes")
+}
