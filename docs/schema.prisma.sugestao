@@ -1,0 +1,71 @@
+// Sugestao de schema.prisma para PostgreSQL (inclui a nova tabela documentos_pro)
+// Compare com o arquivo atual do projeto antes de substituir.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Funcionario {
+  id           Int            @id @default(autoincrement())
+  nome         String
+  email        String         @unique
+  cargo        String
+  salario      Decimal        @db.Decimal(10, 2)
+  criadoEm     DateTime       @default(now())
+  atualizadoEm DateTime       @updatedAt
+  alocacoes    Alocacao[]
+  documentos   DocumentoPro[]
+
+  @@index([cargo])
+  @@map("funcionarios")
+}
+
+model Obra {
+  id           Int        @id @default(autoincrement())
+  nome         String
+  endereco     String
+  status       String     @default("PLANEJADA")
+  dataInicio   DateTime?  @db.Date
+  dataFim      DateTime?  @db.Date
+  criadoEm     DateTime   @default(now())
+  atualizadoEm DateTime   @updatedAt
+  alocacoes    Alocacao[]
+
+  @@index([status])
+  @@map("obras")
+}
+
+model Alocacao {
+  id            Int         @id @default(autoincrement())
+  funcionarioId Int
+  obraId        Int
+  criadoEm      DateTime    @default(now())
+  funcionario   Funcionario @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
+  obra          Obra        @relation(fields: [obraId], references: [id], onDelete: Cascade)
+
+  @@unique([funcionarioId, obraId])
+  @@index([obraId])
+  @@map("alocacoes")
+}
+
+// tipo: EXAME | EPI | TREINAMENTO (validar com Zod, como ja e feito com o status da obra)
+model DocumentoPro {
+  id            Int         @id @default(autoincrement())
+  funcionarioId Int
+  tipo          String
+  descricao     String
+  dataEmissao   DateTime    @db.Date
+  dataValidade  DateTime    @db.Date
+  criadoEm      DateTime    @default(now())
+  atualizadoEm  DateTime    @updatedAt
+  funcionario   Funcionario @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
+
+  @@index([funcionarioId])
+  @@index([dataValidade])
+  @@map("documentos_pro")
+}
