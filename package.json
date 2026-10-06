@@ -2,25 +2,54 @@
   "name": "api-funcionarios-obras",
   "version": "1.0.0",
   "description": "API REST em TypeScript, Node.js, Express e Prisma para gerenciamento de funcionários e obras.",
+  "type": "module",
   "main": "dist/server.js",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit:prod": "npm audit --omit=dev",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "tsx --env-file=.env prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.0",
-    "express": "^5.1.0",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "csrf-sync": "^4.2.1",
+    "express": "^5.2.0",
+    "express-rate-limit": "^8.6.2",
+    "express-session": "^1.19.0",
+    "helmet": "^8.1.0",
+    "pg": "^8.23.1",
+    "pino": "^10.0.0",
+    "pino-http": "^11.0.0",
     "zod": "^4.1.5"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
+    "@types/express-session": "^1.19.0",
     "@types/node": "^24.5.0",
-    "prisma": "^6.19.0",
+    "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.0",
+    "dotenv": "^17.0.0",
+    "pino-pretty": "^13.0.0",
+    "prisma": "^7.10.0",
+    "supertest": "^7.2.2",
     "tsx": "^4.19.1",
-    "typescript": "^5.9.2"
+    "typescript": "~5.9.2",
+    "vitest": "^4.1.5"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.10.0": true,
+    "esbuild@0.28.2": true,
+    "prisma@7.10.0": true
   }
 }

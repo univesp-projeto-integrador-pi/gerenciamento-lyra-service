@@ -1,7 +1,7 @@
 import express from "express";
-import { funcionarioRoutes } from "./routes/funcionario.routes";
-import { obraRoutes } from "./routes/obra.routes";
-import { alocacaoRoutes } from "./routes/alocacao.routes";
+import { alocacaoRoutes } from "./routes/alocacao.routes.js";
+import { funcionarioRoutes } from "./routes/funcionario.routes.js";
+import { obraRoutes } from "./routes/obra.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;

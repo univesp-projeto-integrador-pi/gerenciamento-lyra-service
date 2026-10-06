@@ -5,7 +5,7 @@ import {
   criarFuncionario,
   excluirFuncionario,
   listarFuncionarios
-} from "../controllers/funcionario.controller";
+} from "../controllers/funcionario.controller.js";
 
 export const funcionarioRoutes = Router();
 
