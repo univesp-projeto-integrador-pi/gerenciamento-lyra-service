@@ -5,3 +5,4 @@ dev.db
 prisma/*.db
 prisma/*.db-journal
 /src/generated/
+PASSO-A-PASSO.md
