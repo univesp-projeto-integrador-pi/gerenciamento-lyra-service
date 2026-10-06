@@ -5,7 +5,7 @@ import {
   criarObra,
   excluirObra,
   listarObras
-} from "../controllers/obra.controller";
+} from "../controllers/obra.controller.js";
 
 export const obraRoutes = Router();
 

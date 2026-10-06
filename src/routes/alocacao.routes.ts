@@ -1,12 +1,11 @@
 import { Router } from "express";
-
 import {
-  listarAlocacoes,
+  atualizarAlocacao,
   buscarAlocacao,
   criarAlocacao,
-  atualizarAlocacao,
   excluirAlocacao,
-} from "../controllers/alocacao.controller";
+  listarAlocacoes
+} from "../controllers/alocacao.controller.js";
 
 export const alocacaoRoutes = Router();
 

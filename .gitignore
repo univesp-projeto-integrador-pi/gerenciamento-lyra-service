@@ -4,3 +4,4 @@ dist/
 dev.db
 prisma/*.db
 prisma/*.db-journal
+/src/generated/

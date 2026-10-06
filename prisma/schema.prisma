@@ -1,10 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
 }
 
 model Funcionario {
@@ -12,9 +14,10 @@ model Funcionario {
   nome         String
   email        String       @unique
   cargo        String?
-  salario      Float?
+  salario      Decimal?     @db.Decimal(12, 2)
   criadoEm     DateTime     @default(now())
   atualizadoEm DateTime     @updatedAt
+  excluidoEm   DateTime? 
 
   alocacoes    Alocacao[]
 
@@ -30,6 +33,7 @@ model Obra {
   dataFim      DateTime?
   criadoEm     DateTime      @default(now())
   atualizadoEm DateTime      @updatedAt
+  excluidoEm   DateTime? 
 
   alocacoes    Alocacao[]
 

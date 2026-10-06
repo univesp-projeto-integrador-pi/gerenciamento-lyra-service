@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 export async function listarAlocacoes(_req: Request, res: Response) {
   const alocacoes = await prisma.alocacao.findMany({
