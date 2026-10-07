@@ -1,38 +1,49 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
 
-export async function listarAlocacoes(_req: Request, res: Response) {
+import { lerId } from "../lib/params.js";
+
+const selectAlocacao = {
+  id: true,
+  funcionarioId: true,
+  obraId: true,
+  criadoEm: true,
+  funcionario: { select: { id: true, nome: true, cargo: true } },
+  obra: { select: { id: true, nome: true, status: true } },
+} as const;
+
+type UsuarioLogado = NonNullable<Request["usuario"]>;
+
+function escopo(usuario: UsuarioLogado) {
+  return usuario.papel === "FUNCIONARIO" ? { funcionarioId: usuario.funcionarioId ?? -1 } : {};
+}
+
+export async function listarAlocacoes(req: Request, res: Response) {
   const alocacoes = await prisma.alocacao.findMany({
-    include: {
-      funcionario: true,
-      obra: true,
-    },
-    orderBy: {
-      id: "asc",
-    },
+    where: escopo(req.usuario!),
+    select: selectAlocacao,
+    orderBy: { id: "asc" },
   });
 
   return res.json(alocacoes);
 }
-export async function buscarAlocacao(req: Request, res: Response) {
-  const id = Number(req.params.id);
 
-  const alocacao = await prisma.alocacao.findUnique({
-    where: { id },
-    include: {
-      funcionario: true,
-      obra: true,
-    },
+export async function buscarAlocacao(req: Request, res: Response) {
+  const id = lerId(req.params.id);
+  if (!id) return res.status(400).json({ message: "ID inválido." });
+
+  const alocacao = await prisma.alocacao.findFirst({
+    where: { id, ...escopo(req.usuario!) },
+    select: selectAlocacao,
   });
 
   if (!alocacao) {
-    return res.status(404).json({
-      message: "Alocação não encontrada.",
-    });
+    return res.status(404).json({ message: "Alocação não encontrada." });
   }
 
   return res.json(alocacao);
 }
+
 export async function criarAlocacao(req: Request, res: Response) {
   const { funcionarioId, obraId } = req.body;
 
@@ -94,6 +105,7 @@ export async function criarAlocacao(req: Request, res: Response) {
 
   return res.status(201).json(alocacao);
 }
+
 export async function atualizarAlocacao(req: Request, res: Response) {
   const id = Number(req.params.id);
   const { funcionarioId, obraId } = req.body;
@@ -164,6 +176,7 @@ export async function atualizarAlocacao(req: Request, res: Response) {
 
   return res.json(alocacaoAtualizada);
 }
+
 export async function excluirAlocacao(req: Request, res: Response) {
   const id = Number(req.params.id);
 
