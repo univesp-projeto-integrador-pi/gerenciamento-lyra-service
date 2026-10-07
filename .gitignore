@@ -7,3 +7,4 @@ prisma/*.db-journal
 /src/generated/
 PASSO-A-PASSO.md
 cookies.txt
+teste-s4b.sh
