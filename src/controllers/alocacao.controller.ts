@@ -1,7 +1,8 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
-
 import { lerId } from "../lib/params.js";
+import { ehViolacaoDeUnicidade } from "../lib/erros-prisma.js";
+import { alocacaoSchema } from "../schemas/alocacao.schema.js";
 
 const selectAlocacao = {
   id: true,
@@ -45,154 +46,104 @@ export async function buscarAlocacao(req: Request, res: Response) {
 }
 
 export async function criarAlocacao(req: Request, res: Response) {
-  const { funcionarioId, obraId } = req.body;
+  const resultado = alocacaoSchema.safeParse(req.body);
 
-  if (!funcionarioId || !obraId) {
+  if (!resultado.success) {
     return res.status(400).json({
-      message: "funcionarioId e obraId são obrigatórios.",
+      message: "Dados inválidos.",
+      errors: resultado.error.flatten(),
     });
   }
+
+  const { funcionarioId, obraId } = resultado.data;
 
   const funcionario = await prisma.funcionario.findUnique({
-    where: {
-      id: funcionarioId,
-    },
+    where: { id: funcionarioId },
+    select: { id: true },
   });
-
   if (!funcionario) {
-    return res.status(404).json({
-      message: "Funcionário não encontrado.",
-    });
+    return res.status(404).json({ message: "Funcionário não encontrado." });
   }
 
-  const obra = await prisma.obra.findUnique({
-    where: {
-      id: obraId,
-    },
-  });
-
+  const obra = await prisma.obra.findUnique({ where: { id: obraId }, select: { id: true } });
   if (!obra) {
-    return res.status(404).json({
-      message: "Obra não encontrada.",
-    });
+    return res.status(404).json({ message: "Obra não encontrada." });
   }
 
-  const alocacaoExistente = await prisma.alocacao.findUnique({
-    where: {
-      funcionarioId_obraId: {
-        funcionarioId,
-        obraId,
-      },
-    },
-  });
-
-  if (alocacaoExistente) {
-    return res.status(409).json({
-      message: "Funcionário já está alocado nesta obra.",
+  try {
+    const alocacao = await prisma.alocacao.create({
+      data: { funcionarioId, obraId },
+      select: selectAlocacao,
     });
+
+    return res.status(201).json(alocacao);
+  } catch (erro) {
+    if (ehViolacaoDeUnicidade(erro)) {
+      return res.status(409).json({ message: "Funcionário já está alocado nesta obra." });
+    }
+    throw erro;
   }
-
-  const alocacao = await prisma.alocacao.create({
-    data: {
-      funcionarioId,
-      obraId,
-    },
-    include: {
-      funcionario: true,
-      obra: true,
-    },
-  });
-
-  return res.status(201).json(alocacao);
 }
 
 export async function atualizarAlocacao(req: Request, res: Response) {
-  const id = Number(req.params.id);
-  const { funcionarioId, obraId } = req.body;
+  const id = lerId(req.params.id);
+  if (!id) return res.status(400).json({ message: "ID inválido." });
 
-  const alocacao = await prisma.alocacao.findUnique({
-    where: { id },
-  });
+  const resultado = alocacaoSchema.safeParse(req.body);
 
-  if (!alocacao) {
-    return res.status(404).json({
-      message: "Alocação não encontrada.",
+  if (!resultado.success) {
+    return res.status(400).json({
+      message: "Dados inválidos.",
+      errors: resultado.error.flatten(),
     });
   }
 
-  if (!funcionarioId || !obraId) {
-    return res.status(400).json({
-      message: "funcionarioId e obraId são obrigatórios.",
-    });
+  const { funcionarioId, obraId } = resultado.data;
+
+  const existente = await prisma.alocacao.findUnique({ where: { id }, select: { id: true } });
+  if (!existente) {
+    return res.status(404).json({ message: "Alocação não encontrada." });
   }
 
   const funcionario = await prisma.funcionario.findUnique({
     where: { id: funcionarioId },
+    select: { id: true },
   });
-
   if (!funcionario) {
-    return res.status(404).json({
-      message: "Funcionário não encontrado.",
-    });
+    return res.status(404).json({ message: "Funcionário não encontrado." });
   }
 
-  const obra = await prisma.obra.findUnique({
-    where: { id: obraId },
-  });
-
+  const obra = await prisma.obra.findUnique({ where: { id: obraId }, select: { id: true } });
   if (!obra) {
-    return res.status(404).json({
-      message: "Obra não encontrada.",
-    });
+    return res.status(404).json({ message: "Obra não encontrada." });
   }
 
-  const duplicada = await prisma.alocacao.findFirst({
-    where: {
-      funcionarioId,
-      obraId,
-      NOT: {
-        id,
-      },
-    },
-  });
-
-  if (duplicada) {
-    return res.status(409).json({
-      message: "Funcionário já está alocado nesta obra.",
+  try {
+    const alocacao = await prisma.alocacao.update({
+      where: { id },
+      data: { funcionarioId, obraId },
+      select: selectAlocacao,
     });
+
+    return res.json(alocacao);
+  } catch (erro) {
+    if (ehViolacaoDeUnicidade(erro)) {
+      return res.status(409).json({ message: "Funcionário já está alocado nesta obra." });
+    }
+    throw erro;
   }
-
-  const alocacaoAtualizada = await prisma.alocacao.update({
-    where: { id },
-    data: {
-      funcionarioId,
-      obraId,
-    },
-    include: {
-      funcionario: true,
-      obra: true,
-    },
-  });
-
-  return res.json(alocacaoAtualizada);
 }
 
 export async function excluirAlocacao(req: Request, res: Response) {
-  const id = Number(req.params.id);
+  const id = lerId(req.params.id);
+  if (!id) return res.status(400).json({ message: "ID inválido." });
 
-  const alocacao = await prisma.alocacao.findUnique({
-    where: { id },
-  });
-
-  if (!alocacao) {
-    return res.status(404).json({
-      message: "Alocação não encontrada.",
-    });
+  const existente = await prisma.alocacao.findUnique({ where: { id }, select: { id: true } });
+  if (!existente) {
+    return res.status(404).json({ message: "Alocação não encontrada." });
   }
 
-  await prisma.alocacao.delete({
-    where: { id },
-  });
+  await prisma.alocacao.delete({ where: { id } });
 
   return res.status(204).send();
 }

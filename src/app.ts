@@ -12,6 +12,7 @@ import { usuarioRoutes } from "./routes/usuario.routes.js";
 import { funcionarioRoutes } from "./routes/funcionario.routes.js";
 import { obraRoutes } from "./routes/obra.routes.js";
 import { alocacaoRoutes } from "./routes/alocacao.routes.js";
+import { tratarErros } from "./middlewares/erro.middleware.js";
 
 export const app = express();
 
@@ -62,3 +63,5 @@ app.use("/api/alocacoes", alocacaoRoutes);
 app.use((_req, res) => {
     res.status(404).json({ message: "Rota não encontrada." });
 });
+
+app.use(tratarErros);
