@@ -2,9 +2,11 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import { env } from "./env.js";
-import { limitadorGlobal } from "./lib/rate-limit.js";
+import { gerarToken, csrfSynchronisedProtection } from "./lib/csrf.js";
+import { limitadorGlobal, limitadorToken } from "./lib/rate-limit.js";
 import { sessionMiddleware } from "./lib/session.js";
 import { autenticar, exigirSenhaTrocada } from "./middlewares/auth.middleware.js";
+import { verificarOrigem } from "./middlewares/origem.middleware.js";
 import { authRoutes } from "./routes/auth.routes.js";
 import { usuarioRoutes } from "./routes/usuario.routes.js";
 import { funcionarioRoutes } from "./routes/funcionario.routes.js";
@@ -31,6 +33,8 @@ app.use(
 app.use(limitadorGlobal);
 app.use(express.json({ limit: "10kb" }));
 app.use(sessionMiddleware);
+app.use(verificarOrigem);
+app.use(csrfSynchronisedProtection);
 
 app.use("/api", (_req, res, next) => {
     res.set("Cache-Control", "no-store");
@@ -42,6 +46,10 @@ app.get("/health", (_req, res) => {
         status: "ok",
         message: "API Funcionários e Obras funcionando.",
     });
+});
+
+app.get("/api/csrf-token", limitadorToken, (req, res) => {
+    res.json({ token: gerarToken(req) });
 });
 
 app.use("/api/auth", authRoutes);
