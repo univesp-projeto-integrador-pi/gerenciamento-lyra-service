@@ -1,4 +1,8 @@
 import express from "express";
+import helmet from "helmet";
+import cors from "cors";
+import { env } from "./env.js";
+import { limitadorGlobal } from "./lib/rate-limit.js";
 import { sessionMiddleware } from "./lib/session.js";
 import { autenticar, exigirSenhaTrocada } from "./middlewares/auth.middleware.js";
 import { authRoutes } from "./routes/auth.routes.js";
@@ -9,8 +13,29 @@ import { alocacaoRoutes } from "./routes/alocacao.routes.js";
 
 export const app = express();
 
-app.use(express.json());
+app.disable("x-powered-by");
+app.set("trust proxy", env.TRUST_PROXY > 0 ? env.TRUST_PROXY : false);
+
+app.use(helmet());
+
+app.use(
+    cors({
+        origin: env.FRONTEND_ORIGIN,
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+        allowedHeaders: ["Content-Type", "X-CSRF-Token"],
+        maxAge: 600,
+    }),
+);
+
+app.use(limitadorGlobal);
+app.use(express.json({ limit: "10kb" }));
 app.use(sessionMiddleware);
+
+app.use("/api", (_req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+});
 
 app.get("/health", (_req, res) => {
     res.json({
@@ -21,7 +46,6 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api", autenticar, exigirSenhaTrocada);
-
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/funcionarios", funcionarioRoutes);
 app.use("/api/obras", obraRoutes);
