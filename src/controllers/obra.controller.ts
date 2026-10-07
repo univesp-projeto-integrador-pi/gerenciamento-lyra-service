@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
-import { obraSchema, obraUpdateSchema } from "../schemas/obra.schema";
+import { prisma } from "../lib/prisma.js";
+import { obraSchema, obraUpdateSchema } from "../schemas/obra.schema.js";
 
 export async function listarObras(_req: Request, res: Response) {
   const obras = await prisma.obra.findMany({

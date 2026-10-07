@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
-import { funcionarioSchema, funcionarioUpdateSchema } from "../schemas/funcionario.schema";
+import { prisma } from "../lib/prisma.js";
+import { funcionarioSchema, funcionarioUpdateSchema } from "../schemas/funcionario.schema.js";
 
 export async function listarFuncionarios(_req: Request, res: Response) {
   const funcionarios = await prisma.funcionario.findMany({
