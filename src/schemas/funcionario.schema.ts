@@ -11,5 +11,4 @@ export const funcionarioSchema = z.strictObject({
   cargo: z.string().max(80).optional(),
   salario: dinheiro.optional(),
 });
-
 export const funcionarioUpdateSchema = funcionarioSchema.partial();
