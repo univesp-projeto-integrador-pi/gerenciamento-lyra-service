@@ -6,9 +6,9 @@ const dinheiro = z
   .transform((valor) => valor.replace(",", "."));
 
 export const funcionarioSchema = z.strictObject({
-  nome: z.string().min(2, "Nome deve possuir pelo menos 2 caracteres."),
-  email: z.email("E-mail inválido."),
-  cargo: z.string().optional(),
+  nome: z.string().min(2, "Nome deve possuir pelo menos 2 caracteres.").max(120),
+  email: z.email("E-mail inválido.").max(254),
+  cargo: z.string().max(80).optional(),
   salario: dinheiro.optional(),
 });
 export const funcionarioUpdateSchema = funcionarioSchema.partial();
