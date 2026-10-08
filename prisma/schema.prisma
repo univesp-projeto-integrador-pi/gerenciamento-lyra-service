@@ -88,14 +88,16 @@ model Sessao {
 
 model Auditoria {
   id        Int      @id @default(autoincrement())
-  usuarioId Int?
-  acao      String
-  recurso   String?
+  usuarioId Int?     
+  acao      String   
+  recurso   String?  
   recursoId Int?
+  detalhes  Json?    
   ip        String?
   criadoEm  DateTime @default(now())
 
   @@index([usuarioId])
   @@index([criadoEm])
+  @@index([recurso, recursoId])
   @@map("auditorias")
 }

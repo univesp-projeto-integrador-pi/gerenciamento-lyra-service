@@ -41,6 +41,6 @@ export function tratarErros(erro: unknown, req: Request, res: Response, next: Ne
         return res.status(status).json({ message: status === 403 ? "Acesso negado." : "Requisição inválida." });
     }
 
-    console.error(`[erro] ${req.method} ${req.path}`, erro);
+    req.log.error({ err: erro }, "Erro não tratado");
     return res.status(500).json({ message: "Erro interno." });
 }

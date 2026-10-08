@@ -8,9 +8,10 @@ const schema = z.object({
         .url()
         .refine((v) => new URL(v).origin === v, "Informe só a origem, sem barra no final."),
     SESSION_SECRET: z.string().min(32, "Mínimo de 32 caracteres."),
-    TRUST_PROXY: z.coerce.number().int().min(0).default(0),// não deveria criar uma variavel para issono env?
+    TRUST_PROXY: z.coerce.number().int().min(0).default(0),// não deveria criar uma variavel para isso no env?
     LIMITE_GLOBAL: z.coerce.number().int().positive().default(300),
     LIMITE_LOGIN: z.coerce.number().int().positive().default(10),
+    LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 
 const resultado = schema.safeParse(process.env);
