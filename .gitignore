@@ -14,3 +14,4 @@ teste-s7.sh
 teste-s8.sh
 teste-s9.sh
 teste-logs.sh
+.env.test

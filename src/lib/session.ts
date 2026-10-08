@@ -5,7 +5,7 @@ import { env } from "../env.js";
 
 const PgStore = connectPgSimple(session);
 
-const pool = new pg.Pool({ connectionString: env.DATABASE_URL, max: 5 });
+export const pool = new pg.Pool({ connectionString: env.DATABASE_URL, max: 5 });
 pool.on("error", (erro) => console.error("Erro no pool de sessões:", erro));
 
 export const opcoesCookie = {
