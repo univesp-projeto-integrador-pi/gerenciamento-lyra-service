@@ -9,46 +9,95 @@ datasource db {
   provider = "postgresql"
 }
 
-model Funcionario {
-  id           Int          @id @default(autoincrement())
-  nome         String
-  email        String       @unique
-  cargo        String?
-  salario      Decimal?     @db.Decimal(12, 2)
-  criadoEm     DateTime     @default(now())
-  atualizadoEm DateTime     @updatedAt
-  excluidoEm   DateTime? 
+enum Papel {
+  ADMIN
+  GESTOR
+  FUNCIONARIO
+}
 
-  alocacoes    Alocacao[]
+model Funcionario {
+  id           Int       @id @default(autoincrement())
+  nome         String
+  email        String    @unique
+  cargo        String?
+  salario      Decimal?  @db.Decimal(12, 2)
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+  excluidoEm   DateTime?
+
+  alocacoes Alocacao[]
+  usuario   Usuario?
 
   @@map("funcionarios")
 }
 
 model Obra {
-  id           Int          @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   nome         String
   endereco     String?
-  status       String        @default("PLANEJADA")
+  status       String    @default("PLANEJADA")
   dataInicio   DateTime?
   dataFim      DateTime?
-  criadoEm     DateTime      @default(now())
-  atualizadoEm DateTime      @updatedAt
-  excluidoEm   DateTime? 
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+  excluidoEm   DateTime?
 
-  alocacoes    Alocacao[]
+  alocacoes Alocacao[]
 
   @@map("obras")
 }
 
 model Alocacao {
-  id            Int         @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   funcionarioId Int
   obraId        Int
-  criadoEm      DateTime    @default(now())
+  criadoEm      DateTime @default(now())
 
-  funcionario   Funcionario @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
-  obra          Obra        @relation(fields: [obraId], references: [id], onDelete: Cascade)
+  funcionario Funcionario @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
+  obra        Obra        @relation(fields: [obraId], references: [id], onDelete: Cascade)
 
   @@unique([funcionarioId, obraId])
   @@map("alocacoes")
+}
+
+model Usuario {
+  id                 Int          @id @default(autoincrement())
+  email              String       @unique
+  senhaHash          String
+  papel              Papel        @default(FUNCIONARIO)
+  ativo              Boolean      @default(true)
+  precisaTrocarSenha Boolean      @default(true)
+  tentativasFalhas   Int          @default(0)
+  bloqueadoAte       DateTime?
+  funcionarioId      Int?         @unique
+  funcionario        Funcionario? @relation(fields: [funcionarioId], references: [id], onDelete: SetNull)
+  criadoEm           DateTime     @default(now())
+  atualizadoEm       DateTime     @updatedAt
+
+  @@map("usuarios")
+}
+
+model Sessao {
+  sid    String   @id @db.VarChar
+  sess   Json     @db.Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
+  @@map("session")
+}
+
+model Auditoria {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int?     
+  acao      String   
+  recurso   String?  
+  recursoId Int?
+  detalhes  Json?    
+  ip        String?
+  criadoEm  DateTime @default(now())
+
+  @@index([usuarioId])
+  @@index([criadoEm])
+  @@index([recurso, recursoId])
+  @@map("auditorias")
 }

@@ -5,3 +5,13 @@ dev.db
 prisma/*.db
 prisma/*.db-journal
 /src/generated/
+PASSO-A-PASSO.md
+cookies.txt
+teste-s4b.sh
+teste-s5.sh
+teste-s6.sh
+teste-s7.sh
+teste-s8.sh
+teste-s9.sh
+teste-logs.sh
+.env.test
